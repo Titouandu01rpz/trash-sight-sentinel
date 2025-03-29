@@ -18,9 +18,10 @@ import ModelUploader from './dashboard/ModelUploader';
 
 const Dashboard: React.FC = () => {
   const [detections, setDetections] = useState<Detection[]>([]);
+  const [activeDetection, setActiveDetection] = useState<string | null>(null);
   const [frameSize, setFrameSize] = useState({ width: 640, height: 480 });
   const [trashType, setTrashType] = useState('dark');
-  const [acceptedCategories, setAcceptedCategories] = useState<string[]>(['metal']);
+  const [acceptedCategories, setAcceptedCategories] = useState<string[]>(['metal', 'trash']);
   const [showRejection, setShowRejection] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [detectionCount, setDetectionCount] = useState(0);
@@ -43,8 +44,8 @@ const Dashboard: React.FC = () => {
         if (loaded) {
           setIsModelLoaded(true);
           toast({
-            title: "Model loaded from storage",
-            description: "Using the previously saved model"
+            title: "ML Model loaded from storage",
+            description: "Using the previously saved model for object detection"
           });
         }
       } catch (error) {
@@ -65,11 +66,34 @@ const Dashboard: React.FC = () => {
       const timer = setTimeout(() => {
         setShowRejection(false);
         setIsPaused(false);
-      }, 3000); // 3 seconds as per requirements
+      }, 3000); // 3 seconds rejection timeout
       
       return () => clearTimeout(timer);
     }
   }, [showRejection]);
+
+  // Map trash type to expected categories
+  useEffect(() => {
+    // Default mappings based on trash type
+    switch (trashType) {
+      case 'dark':
+        setAcceptedCategories(['metal', 'trash']);
+        break;
+      case 'light':
+        setAcceptedCategories(['paper', 'cardboard']);
+        break;
+      case 'colorful':
+        setAcceptedCategories(['plastic', 'glass']);
+        break;
+      default:
+        setAcceptedCategories(['metal']);
+    }
+    
+    toast({
+      title: `Trash type changed: ${trashType}`,
+      description: `Now accepting: ${acceptedCategories.join(', ')}`,
+    });
+  }, [trashType]);
 
   const handleFrame = async (imageData: ImageData) => {
     if (isPaused) return;
@@ -83,6 +107,7 @@ const Dashboard: React.FC = () => {
     try {
       // Use TensorFlow model if loaded, otherwise fall back to mock service
       let newDetections: Detection[];
+      
       if (isModelLoaded) {
         newDetections = await tensorflowService.detectObjects(imageData);
       } else {
@@ -90,7 +115,19 @@ const Dashboard: React.FC = () => {
       }
       
       if (newDetections.length > 0) {
-        setDetectionCount(prev => prev + newDetections.length);
+        // Track active detection
+        if (newDetections.length > 0) {
+          const largest = newDetections.reduce((prev, current) => {
+            const prevArea = prev.bbox.width * prev.bbox.height;
+            const currentArea = current.bbox.width * current.bbox.height;
+            return currentArea > prevArea ? current : prev;
+          });
+          setActiveDetection(largest.class);
+        } else {
+          setActiveDetection(null);
+        }
+        
+        setDetectionCount(prev => prev + 1);
         
         // Check for rejection conditions - only closest object should trigger rejection
         let closestRejectionDetected = false;
@@ -127,24 +164,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Map trash type to expected categories
-  useEffect(() => {
-    // Default mappings based on trash type
-    switch (trashType) {
-      case 'dark':
-        setAcceptedCategories(['metal', 'trash']);
-        break;
-      case 'light':
-        setAcceptedCategories(['paper', 'cardboard']);
-        break;
-      case 'colorful':
-        setAcceptedCategories(['plastic', 'glass']);
-        break;
-      default:
-        setAcceptedCategories(['metal']);
-    }
-  }, [trashType]);
-
   const handlePermissionChange = (newPermissionState: boolean | null) => {
     setHasPermission(newPermissionState);
   };
@@ -164,6 +183,10 @@ const Dashboard: React.FC = () => {
 
   const handleModelLoaded = () => {
     setIsModelLoaded(true);
+    toast({
+      title: "ML Model loaded successfully",
+      description: "Now using machine learning for object detection"
+    });
   };
 
   return (
@@ -194,11 +217,13 @@ const Dashboard: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-wrap">
                 <CardTitle>Camera Feed {isModelLoaded ? '(ML Active)' : '(Mock Data)'}</CardTitle>
                 <StatisticsSection 
                   detectionCount={detectionCount}
                   rejectionCount={rejectionCount}
+                  isModelLoaded={isModelLoaded}
+                  activeCategory={activeDetection}
                 />
               </div>
             </CardHeader>

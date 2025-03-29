@@ -10,12 +10,17 @@ interface CameraProps {
   onPermissionChange?: (hasPermission: boolean | null) => void;
 }
 
-const Camera: React.FC<CameraProps> = ({ 
+// Create a type to properly use the ref
+export type CameraRef = {
+  startCamera: () => Promise<void>;
+};
+
+const Camera = React.forwardRef<CameraRef, CameraProps>(({ 
   onFrame, 
   showRejection, 
   isPaused,
   onPermissionChange 
-}) => {
+}, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -53,13 +58,9 @@ const Camera: React.FC<CameraProps> = ({
   };
 
   // Expose startCamera method to parent using React.forwardRef
-  React.useImperativeHandle(
-    // We'll create a ref type in Dashboard.tsx
-    React.forwardRef((_, ref) => ({
-      startCamera
-    })),
-    [stream]
-  );
+  React.useImperativeHandle(ref, () => ({
+    startCamera
+  }), [stream]);
 
   useEffect(() => {
     // Don't automatically start camera on component mount
@@ -144,14 +145,8 @@ const Camera: React.FC<CameraProps> = ({
       )}
     </div>
   );
-};
-
-// Create a type to properly use the ref
-export type CameraRef = {
-  startCamera: () => Promise<void>;
-};
-
-export default React.forwardRef<CameraRef, CameraProps>((props, ref) => {
-  const Component = Camera;
-  return <Component {...props} ref={ref} />;
 });
+
+Camera.displayName = "Camera";
+
+export default Camera;

@@ -1,15 +1,17 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import Camera, { CameraRef } from './Camera';
-import DetectionOverlay from './DetectionOverlay';
-import AcceptanceSelector from './AcceptanceSelector';
+import { CameraRef } from './Camera';
 import CameraPermissionDialog from './CameraPermissionDialog';
 import detectionService, { Detection } from '@/services/DetectionService';
 import audioService from '@/services/AudioService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { InfoIcon, Camera as CameraIcon } from 'lucide-react';
-import { Button } from './ui/button';
+
+// Import refactored components
+import CameraSection from './dashboard/CameraSection';
+import StatisticsSection from './dashboard/StatisticsSection';
+import SettingsCard from './dashboard/SettingsCard';
+import SettingsDisplay from './dashboard/SettingsDisplay';
+import InformationAlert from './dashboard/InformationAlert';
 
 const Dashboard: React.FC = () => {
   const [detections, setDetections] = useState<Detection[]>([]);
@@ -117,40 +119,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const CameraSection = () => {
-    if (hasPermission === false) {
-      return (
-        <div className="flex flex-col items-center justify-center p-8 bg-gray-100 rounded-lg">
-          <CameraIcon size={48} className="text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium mb-2">Camera access denied</h3>
-          <p className="text-gray-500 text-center mb-4">
-            Please allow camera access in your browser settings and refresh the page.
-          </p>
-          <Button onClick={() => setShowPermissionDialog(true)}>
-            Try Again
-          </Button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="relative">
-        <Camera 
-          ref={cameraRef}
-          onFrame={handleFrame} 
-          showRejection={showRejection}
-          isPaused={isPaused}
-          onPermissionChange={handlePermissionChange}
-        />
-        <DetectionOverlay 
-          detections={detections} 
-          width={frameSize.width} 
-          height={frameSize.height} 
-        />
-      </div>
-    );
-  };
-
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       <header className="text-center mb-8">
@@ -170,69 +138,42 @@ const Dashboard: React.FC = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Camera Feed</CardTitle>
-                <div className="flex gap-2">
-                  <Badge variant="outline">
-                    Detections: {detectionCount}
-                  </Badge>
-                  <Badge variant="outline" className="bg-red-50">
-                    Rejections: {rejectionCount}
-                  </Badge>
-                </div>
+                <StatisticsSection 
+                  detectionCount={detectionCount}
+                  rejectionCount={rejectionCount}
+                />
               </div>
             </CardHeader>
             <CardContent>
-              <CameraSection />
-            </CardContent>
-          </Card>
-
-          <Alert>
-            <InfoIcon className="h-4 w-4" />
-            <AlertTitle>How It Works</AlertTitle>
-            <AlertDescription>
-              The system detects waste items and classifies them into six categories. 
-              When items not matching your acceptance criteria are detected close to the camera,
-              a red X and warning sound will appear, and detection will pause for 2 seconds.
-            </AlertDescription>
-          </Alert>
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Acceptance Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AcceptanceSelector 
-                trashType={trashType}
-                onTrashTypeChange={setTrashType}
-                acceptedCategories={acceptedCategories}
-                onAcceptedCategoriesChange={setAcceptedCategories}
+              <CameraSection 
+                cameraRef={cameraRef}
+                onFrame={handleFrame}
+                showRejection={showRejection}
+                isPaused={isPaused}
+                hasPermission={hasPermission}
+                onPermissionChange={handlePermissionChange}
+                detections={detections}
+                frameSize={frameSize}
+                onRetryPermission={() => setShowPermissionDialog(true)}
               />
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Current Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div>
-                  <span className="font-semibold">Trash Type:</span> {trashType}
-                </div>
-                <div>
-                  <span className="font-semibold">Accepted Categories:</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {acceptedCategories.map(category => (
-                      <Badge key={category} variant="secondary">
-                        {category}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <InformationAlert />
+        </div>
+
+        <div className="space-y-6">
+          <SettingsCard 
+            trashType={trashType}
+            onTrashTypeChange={setTrashType}
+            acceptedCategories={acceptedCategories}
+            onAcceptedCategoriesChange={setAcceptedCategories}
+          />
+
+          <SettingsDisplay 
+            trashType={trashType}
+            acceptedCategories={acceptedCategories}
+          />
         </div>
       </div>
     </div>

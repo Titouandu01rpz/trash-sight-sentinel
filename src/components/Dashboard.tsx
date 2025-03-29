@@ -3,8 +3,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CameraRef } from './Camera';
 import CameraPermissionDialog from './CameraPermissionDialog';
 import detectionService, { Detection } from '@/services/DetectionService';
+import tensorflowService from '@/services/TensorflowService';
 import audioService from '@/services/AudioService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 // Import refactored components
 import CameraSection from './dashboard/CameraSection';
@@ -12,6 +14,7 @@ import StatisticsSection from './dashboard/StatisticsSection';
 import SettingsCard from './dashboard/SettingsCard';
 import SettingsDisplay from './dashboard/SettingsDisplay';
 import InformationAlert from './dashboard/InformationAlert';
+import ModelUploader from './dashboard/ModelUploader';
 
 const Dashboard: React.FC = () => {
   const [detections, setDetections] = useState<Detection[]>([]);
@@ -24,18 +27,45 @@ const Dashboard: React.FC = () => {
   const [rejectionCount, setRejectionCount] = useState(0);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [showPermissionDialog, setShowPermissionDialog] = useState(true);
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [isCheckingStorage, setIsCheckingStorage] = useState(true);
   
+  const { toast } = useToast();
+
   // Create a ref to the camera component
   const cameraRef = useRef<CameraRef>(null);
 
-  // Reset system after rejection
+  // Check if model is already in browser storage
+  useEffect(() => {
+    const checkModelInStorage = async () => {
+      try {
+        const loaded = await tensorflowService.loadModelFromStorage();
+        if (loaded) {
+          setIsModelLoaded(true);
+          toast({
+            title: "Model loaded from storage",
+            description: "Using the previously saved model"
+          });
+        }
+      } catch (error) {
+        console.error('Error checking for model in storage:', error);
+      } finally {
+        setIsCheckingStorage(false);
+      }
+    };
+
+    checkModelInStorage();
+  }, [toast]);
+
+  // Reset system after rejection, but continue monitoring other objects
   useEffect(() => {
     if (showRejection) {
+      // We're pausing all detections briefly
       setIsPaused(true);
       const timer = setTimeout(() => {
         setShowRejection(false);
         setIsPaused(false);
-      }, 2000);
+      }, 3000); // 3 seconds as per requirements
       
       return () => clearTimeout(timer);
     }
@@ -51,30 +81,43 @@ const Dashboard: React.FC = () => {
     
     // Process frame with detection service
     try {
-      const newDetections = await detectionService.detectObjects(imageData);
+      // Use TensorFlow model if loaded, otherwise fall back to mock service
+      let newDetections: Detection[];
+      if (isModelLoaded) {
+        newDetections = await tensorflowService.detectObjects(imageData);
+      } else {
+        newDetections = await detectionService.detectObjects(imageData);
+      }
       
       if (newDetections.length > 0) {
-        setDetectionCount(prev => prev + 1);
+        setDetectionCount(prev => prev + newDetections.length);
         
-        // Check for rejection conditions
-        const rejectionDetected = newDetections.some(detection => {
-          // Check if this category is not accepted
-          const isAccepted = acceptedCategories.includes(detection.class);
-          
-          // Check if object is close enough to trigger rejection
+        // Check for rejection conditions - only closest object should trigger rejection
+        let closestRejectionDetected = false;
+        
+        // Sort detections by size (largest first - assuming closer to camera)
+        const sortedDetections = [...newDetections].sort((a, b) => {
+          const areaA = a.bbox.width * a.bbox.height;
+          const areaB = b.bbox.width * b.bbox.height;
+          return areaB - areaA; // Largest first
+        });
+        
+        // Only check the largest object for rejection
+        const largestDetection = sortedDetections[0];
+        if (largestDetection) {
+          const isAccepted = acceptedCategories.includes(largestDetection.class);
           const isClose = detectionService.isObjectClose(
-            detection.bbox, 
+            largestDetection.bbox, 
             imageData.width, 
             imageData.height
           );
           
-          return !isAccepted && isClose;
-        });
-        
-        if (rejectionDetected) {
-          setRejectionCount(prev => prev + 1);
-          setShowRejection(true);
-          audioService.playBeep();
+          if (!isAccepted && isClose) {
+            closestRejectionDetected = true;
+            setRejectionCount(prev => prev + 1);
+            setShowRejection(true);
+            audioService.playBeep();
+          }
         }
       }
       
@@ -119,6 +162,10 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleModelLoaded = () => {
+    setIsModelLoaded(true);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       <header className="text-center mb-8">
@@ -132,12 +179,23 @@ const Dashboard: React.FC = () => {
         onRequestPermission={handleRequestPermission}
       />
 
+      {!isModelLoaded && !isCheckingStorage && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>ML Model Required</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ModelUploader onModelLoaded={handleModelLoaded} />
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>Camera Feed</CardTitle>
+                <CardTitle>Camera Feed {isModelLoaded ? '(ML Active)' : '(Mock Data)'}</CardTitle>
                 <StatisticsSection 
                   detectionCount={detectionCount}
                   rejectionCount={rejectionCount}

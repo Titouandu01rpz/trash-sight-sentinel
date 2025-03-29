@@ -1,6 +1,5 @@
-
-import React, { useState, useEffect } from 'react';
-import Camera from './Camera';
+import React, { useState, useEffect, useRef } from 'react';
+import Camera, { CameraRef } from './Camera';
 import DetectionOverlay from './DetectionOverlay';
 import AcceptanceSelector from './AcceptanceSelector';
 import CameraPermissionDialog from './CameraPermissionDialog';
@@ -23,6 +22,9 @@ const Dashboard: React.FC = () => {
   const [rejectionCount, setRejectionCount] = useState(0);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [showPermissionDialog, setShowPermissionDialog] = useState(true);
+  
+  // Create a ref to the camera component
+  const cameraRef = useRef<CameraRef>(null);
 
   // Reset system after rejection
   useEffect(() => {
@@ -104,23 +106,14 @@ const Dashboard: React.FC = () => {
 
   const handleRequestPermission = () => {
     setShowPermissionDialog(false);
-    const cameraRef = document.querySelector('video');
-    if (cameraRef) {
-      cameraRef.onloadedmetadata = null;
-    }
     
-    // Get camera instance and request permissions
-    const cameraInstance = document.querySelector<any>('camera-component');
-    if (cameraInstance && cameraInstance.startCamera) {
-      cameraInstance.startCamera();
-    } else {
-      // Fallback if we can't access the camera component directly
-      setTimeout(() => {
-        const videoElement = document.querySelector('video');
-        if (videoElement && !videoElement.srcObject) {
-          window.location.reload();
-        }
-      }, 500);
+    // Use the ref to call startCamera on the Camera component
+    if (cameraRef.current) {
+      cameraRef.current.startCamera().catch(error => {
+        console.error('Failed to start camera:', error);
+        // Show the permission dialog again if there was an error
+        setShowPermissionDialog(true);
+      });
     }
   };
 
@@ -143,6 +136,7 @@ const Dashboard: React.FC = () => {
     return (
       <div className="relative">
         <Camera 
+          ref={cameraRef}
           onFrame={handleFrame} 
           showRejection={showRejection}
           isPaused={isPaused}

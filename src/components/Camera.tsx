@@ -22,6 +22,7 @@ const Camera: React.FC<CameraProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
 
+  // Make startCamera accessible to parent components via a ref
   const startCamera = async () => {
     try {
       if (stream) {
@@ -50,6 +51,15 @@ const Camera: React.FC<CameraProps> = ({
       if (onPermissionChange) onPermissionChange(false);
     }
   };
+
+  // Expose startCamera method to parent using React.forwardRef
+  React.useImperativeHandle(
+    // We'll create a ref type in Dashboard.tsx
+    React.forwardRef((_, ref) => ({
+      startCamera
+    })),
+    [stream]
+  );
 
   useEffect(() => {
     // Don't automatically start camera on component mount
@@ -136,4 +146,12 @@ const Camera: React.FC<CameraProps> = ({
   );
 };
 
-export default Camera;
+// Create a type to properly use the ref
+export type CameraRef = {
+  startCamera: () => Promise<void>;
+};
+
+export default React.forwardRef<CameraRef, CameraProps>((props, ref) => {
+  const Component = Camera;
+  return <Component {...props} ref={ref} />;
+});

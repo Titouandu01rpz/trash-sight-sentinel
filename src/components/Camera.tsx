@@ -7,45 +7,60 @@ interface CameraProps {
   onFrame: (imageData: ImageData) => void;
   showRejection: boolean;
   isPaused: boolean;
+  onPermissionChange?: (hasPermission: boolean | null) => void;
 }
 
-const Camera: React.FC<CameraProps> = ({ onFrame, showRejection, isPaused }) => {
+const Camera: React.FC<CameraProps> = ({ 
+  onFrame, 
+  showRejection, 
+  isPaused,
+  onPermissionChange 
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+
+  const startCamera = async () => {
+    try {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      
+      const newStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        } 
+      });
+      
+      setStream(newStream);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = newStream;
+        setHasPermission(true);
+        if (onPermissionChange) onPermissionChange(true);
+      }
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      setHasPermission(false);
+      setErrorMessage('Camera access denied. Please allow camera permissions and try again.');
+      if (onPermissionChange) onPermissionChange(false);
+    }
+  };
 
   useEffect(() => {
-    const startCamera = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'environment',
-            width: { ideal: 640 },
-            height: { ideal: 480 }
-          } 
-        });
-        
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          setHasPermission(true);
-        }
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-        setHasPermission(false);
-        setErrorMessage('Camera access denied. Please allow camera permissions and refresh the page.');
-      }
-    };
-
-    startCamera();
-
+    // Don't automatically start camera on component mount
+    // This will be triggered by the permission dialog
+    
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
+      if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [stream]);
 
   useEffect(() => {
     if (!hasPermission || !videoRef.current || !canvasRef.current) return;

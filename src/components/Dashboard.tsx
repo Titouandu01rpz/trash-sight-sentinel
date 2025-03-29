@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react';
 import Camera from './Camera';
 import DetectionOverlay from './DetectionOverlay';
 import AcceptanceSelector from './AcceptanceSelector';
+import CameraPermissionDialog from './CameraPermissionDialog';
 import detectionService, { Detection } from '@/services/DetectionService';
 import audioService from '@/services/AudioService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { InfoIcon } from 'lucide-react';
+import { InfoIcon, Camera as CameraIcon } from 'lucide-react';
+import { Button } from './ui/button';
 
 const Dashboard: React.FC = () => {
   const [detections, setDetections] = useState<Detection[]>([]);
@@ -19,6 +21,8 @@ const Dashboard: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [detectionCount, setDetectionCount] = useState(0);
   const [rejectionCount, setRejectionCount] = useState(0);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [showPermissionDialog, setShowPermissionDialog] = useState(true);
 
   // Reset system after rejection
   useEffect(() => {
@@ -94,12 +98,77 @@ const Dashboard: React.FC = () => {
     }
   }, [trashType]);
 
+  const handlePermissionChange = (newPermissionState: boolean | null) => {
+    setHasPermission(newPermissionState);
+  };
+
+  const handleRequestPermission = () => {
+    setShowPermissionDialog(false);
+    const cameraRef = document.querySelector('video');
+    if (cameraRef) {
+      cameraRef.onloadedmetadata = null;
+    }
+    
+    // Get camera instance and request permissions
+    const cameraInstance = document.querySelector<any>('camera-component');
+    if (cameraInstance && cameraInstance.startCamera) {
+      cameraInstance.startCamera();
+    } else {
+      // Fallback if we can't access the camera component directly
+      setTimeout(() => {
+        const videoElement = document.querySelector('video');
+        if (videoElement && !videoElement.srcObject) {
+          window.location.reload();
+        }
+      }, 500);
+    }
+  };
+
+  const CameraSection = () => {
+    if (hasPermission === false) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 bg-gray-100 rounded-lg">
+          <CameraIcon size={48} className="text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium mb-2">Camera access denied</h3>
+          <p className="text-gray-500 text-center mb-4">
+            Please allow camera access in your browser settings and refresh the page.
+          </p>
+          <Button onClick={() => setShowPermissionDialog(true)}>
+            Try Again
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="relative">
+        <Camera 
+          onFrame={handleFrame} 
+          showRejection={showRejection}
+          isPaused={isPaused}
+          onPermissionChange={handlePermissionChange}
+        />
+        <DetectionOverlay 
+          detections={detections} 
+          width={frameSize.width} 
+          height={frameSize.height} 
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       <header className="text-center mb-8">
         <h1 className="text-3xl font-bold text-primary">Trash Sight Sentinel</h1>
         <p className="text-muted-foreground">Real-time waste detection and sorting system</p>
       </header>
+
+      <CameraPermissionDialog
+        open={showPermissionDialog}
+        onOpenChange={setShowPermissionDialog}
+        onRequestPermission={handleRequestPermission}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -118,18 +187,7 @@ const Dashboard: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="relative">
-                <Camera 
-                  onFrame={handleFrame} 
-                  showRejection={showRejection}
-                  isPaused={isPaused}
-                />
-                <DetectionOverlay 
-                  detections={detections} 
-                  width={frameSize.width} 
-                  height={frameSize.height} 
-                />
-              </div>
+              <CameraSection />
             </CardContent>
           </Card>
 

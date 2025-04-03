@@ -7,7 +7,7 @@ import { Recycle, Trash2 } from 'lucide-react';
 
 // Import custom hooks
 import { useModelLoader } from '@/hooks/useModelLoader';
-import { useTrashCategories } from '@/hooks/useTrashCategories';
+import { useTrashCategories, WasteCategory } from '@/hooks/useTrashCategories';
 import { useCameraPermission } from '@/hooks/useCameraPermission';
 import { useObjectDetection } from '@/hooks/useObjectDetection';
 
@@ -66,6 +66,11 @@ const Dashboard: React.FC = () => {
 
   const handleRequestPermissionWithRef = () => {
     handleRequestPermission(cameraRef);
+  };
+
+  // Type converter function to handle string[] to WasteCategory[]
+  const handleAcceptedCategoriesChange = (categories: string[]) => {
+    setAcceptedCategories(categories as WasteCategory[]);
   };
 
   return (
@@ -146,7 +151,7 @@ const Dashboard: React.FC = () => {
             selectedBin={selectedBin}
             onBinChange={setSelectedBin}
             acceptedCategories={acceptedCategories}
-            onAcceptedCategoriesChange={setAcceptedCategories}
+            onAcceptedCategoriesChange={handleAcceptedCategoriesChange}
           />
 
           <SettingsDisplay 

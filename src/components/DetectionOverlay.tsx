@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Detection } from '@/services/DetectionService';
+import { WasteCategory } from '@/hooks/useTrashCategories';
 
 interface DetectionOverlayProps {
   detections: Detection[];
@@ -22,7 +23,8 @@ const DetectionOverlay: React.FC<DetectionOverlayProps> = ({ detections, width, 
         
         // Get color based on waste category
         let color;
-        switch (category) {
+        const wasteCategory = category as WasteCategory;
+        switch (wasteCategory) {
           case 'cardboard': color = '#E3A76F'; break;
           case 'glass': color = '#88D8C0'; break;
           case 'metal': color = '#A1A1AA'; break;
@@ -69,7 +71,7 @@ const DetectionOverlay: React.FC<DetectionOverlayProps> = ({ detections, width, 
               fill="white"
               fontSize="14"
               fontWeight="bold"
-              textShadow="0 1px 2px rgba(0,0,0,0.3)"
+              style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}
             >
               {category} ({Math.round(confidence * 100)}%)
             </text>

@@ -7,18 +7,22 @@ export type BinType = {
   id: string;
   name: string;
   color: string;
+  description?: string;
 };
 
 export const BINS: BinType[] = [
-  { id: 'green', name: 'Glass', color: '#4CAF50' },
-  { id: 'yellow', name: 'Plastic & Packaging', color: '#FFEB3B' },
-  { id: 'blue', name: 'Paper', color: '#2196F3' },
-  { id: 'red', name: 'Metal', color: '#F44336' },
-  { id: 'gray', name: 'Regular Waste', color: '#9E9E9E' },
-  { id: 'brown', name: 'Organic Waste', color: '#795548' },
-  { id: 'purple', name: 'Batteries', color: '#9C27B0' },
-  { id: 'white', name: 'Cups', color: '#FFFFFF' },
+  { id: 'green', name: 'Glass', color: '#4CAF50', description: 'For glass items without caps or lids.' },
+  { id: 'yellow', name: 'Plastic & Packaging', color: '#FFEB3B', description: 'For plastic and cardboard packaging. You can leave bottle caps on.' },
+  { id: 'blue', name: 'Paper', color: '#2196F3', description: 'For paper, newspapers, magazines, and flyers.' },
+  { id: 'red', name: 'Metal', color: '#F44336', description: 'For metal waste and containers.' },
+  { id: 'gray', name: 'Regular Waste', color: '#9E9E9E', description: 'For general non-recyclable waste.' },
+  { id: 'brown', name: 'Organic Waste', color: '#795548', description: 'For food scraps and biodegradable waste.' },
+  { id: 'purple', name: 'Batteries', color: '#9C27B0', description: 'For used batteries and similar items.' },
+  { id: 'white', name: 'Cups', color: '#FFFFFF', description: 'For disposable cups and similar items.' },
 ];
+
+// Export BINS as binTypes for backward compatibility
+export const binTypes = BINS;
 
 const DEFAULT_CATEGORIES: Record<string, WasteCategory[]> = {
   green: ['glass'],

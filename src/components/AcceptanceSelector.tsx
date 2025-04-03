@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import RecyclingBin from './RecyclingBin';
-import { binTypes } from '@/hooks/useTrashCategories';
+import { BinType, BINS } from '@/hooks/useTrashCategories';
+import ScrollAreaFixed from './ScrollAreaFixed';
 
 interface AcceptanceSelectorProps {
   selectedBin: string;
@@ -24,9 +24,9 @@ const AcceptanceSelector: React.FC<AcceptanceSelectorProps> = ({
         <Label className="text-lg font-semibold">Select a Recycling Bin</Label>
         <p className="text-muted-foreground text-sm">Choose the type of waste you want to collect</p>
 
-        <ScrollArea className="w-full" orientation="horizontal">
+        <ScrollAreaFixed className="w-full">
           <div className="flex space-x-4 py-4 px-1">
-            {binTypes.map(bin => (
+            {BINS.map(bin => (
               <RecyclingBin 
                 key={bin.id} 
                 bin={bin} 
@@ -35,7 +35,7 @@ const AcceptanceSelector: React.FC<AcceptanceSelectorProps> = ({
               />
             ))}
           </div>
-        </ScrollArea>
+        </ScrollAreaFixed>
       </div>
 
       <Card>
@@ -43,7 +43,7 @@ const AcceptanceSelector: React.FC<AcceptanceSelectorProps> = ({
           <CardTitle className="text-lg">Selected Bin Info</CardTitle>
         </CardHeader>
         <CardContent>
-          {binTypes.find(bin => bin.id === selectedBin)?.description}
+          {BINS.find(bin => bin.id === selectedBin)?.description}
           <div className="mt-2">
             <span className="font-semibold">Accepts:</span>{" "}
             <span className="italic">{acceptedCategories.join(', ')}</span>

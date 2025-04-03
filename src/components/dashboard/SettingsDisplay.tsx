@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { BinType, binTypes } from '@/hooks/useTrashCategories';
+import { BinType, BINS } from '@/hooks/useTrashCategories';
 import { Recycle } from 'lucide-react';
 
 interface SettingsDisplayProps {
@@ -14,7 +14,7 @@ const SettingsDisplay: React.FC<SettingsDisplayProps> = ({
   selectedBin,
   acceptedCategories
 }) => {
-  const currentBin = binTypes.find(bin => bin.id === selectedBin) as BinType;
+  const currentBin = BINS.find(bin => bin.id === selectedBin) as BinType;
   
   return (
     <Card>

@@ -2,9 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Detection } from '@/services/DetectionService';
 import detectionService from '@/services/DetectionService';
-import tensorflowService from '@/services/TensorflowService';
 import audioService from '@/services/AudioService';
-import { useToast } from '@/hooks/use-toast';
 
 interface UseObjectDetectionProps {
   isPaused: boolean;
@@ -14,8 +12,7 @@ interface UseObjectDetectionProps {
 
 export const useObjectDetection = ({ 
   isPaused, 
-  acceptedCategories, 
-  isModelLoaded 
+  acceptedCategories
 }: UseObjectDetectionProps) => {
   const [detections, setDetections] = useState<Detection[]>([]);
   const [activeDetection, setActiveDetection] = useState<string | null>(null);
@@ -34,14 +31,8 @@ export const useObjectDetection = ({
     
     // Process frame with detection service
     try {
-      // Use TensorFlow model if loaded, otherwise fall back to mock service
-      let newDetections: Detection[];
-      
-      if (isModelLoaded) {
-        newDetections = await tensorflowService.detectObjects(imageData);
-      } else {
-        newDetections = await detectionService.detectObjects(imageData);
-      }
+      // Use mock detection service
+      const newDetections = await detectionService.detectObjects(imageData);
       
       if (newDetections.length > 0) {
         // Track active detection

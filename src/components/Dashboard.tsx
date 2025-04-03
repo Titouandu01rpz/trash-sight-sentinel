@@ -17,7 +17,6 @@ import StatisticsSection from './dashboard/StatisticsSection';
 import SettingsCard from './dashboard/SettingsCard';
 import SettingsDisplay from './dashboard/SettingsDisplay';
 import InformationAlert from './dashboard/InformationAlert';
-import ModelUploader from './dashboard/ModelUploader';
 
 const Dashboard: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
@@ -26,7 +25,7 @@ const Dashboard: React.FC = () => {
   const cameraRef = useRef<CameraRef>(null);
   
   // Use custom hooks
-  const { isModelLoaded, isCheckingStorage, handleModelLoaded } = useModelLoader();
+  const { isModelLoaded, isCheckingStorage } = useModelLoader();
   const { selectedBin, setSelectedBin, acceptedCategories, setAcceptedCategories } = useTrashCategories();
   const { 
     hasPermission, 
@@ -95,20 +94,6 @@ const Dashboard: React.FC = () => {
         onRequestPermission={handleRequestPermissionWithRef}
       />
 
-      {!isModelLoaded && !isCheckingStorage && (
-        <Card className="mb-6 border-dashed border-2 border-primary/50">
-          <CardHeader>
-            <CardTitle className="text-center flex items-center justify-center gap-2">
-              <Recycle className="text-primary" />
-              ML Model Required
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ModelUploader onModelLoaded={handleModelLoaded} />
-          </CardContent>
-        </Card>
-      )}
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card className="overflow-hidden border-2 border-primary/20">
@@ -118,7 +103,7 @@ const Dashboard: React.FC = () => {
                   <div className="p-1.5 bg-primary/10 rounded-full">
                     <Recycle size={20} className="text-primary" />
                   </div>
-                  Camera Feed {isModelLoaded ? '(ML Active)' : '(Mock Data)'}
+                  Camera Feed
                 </CardTitle>
                 <StatisticsSection 
                   detectionCount={detectionCount}

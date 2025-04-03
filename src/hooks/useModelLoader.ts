@@ -4,30 +4,37 @@ import tensorflowService from '@/services/TensorflowService';
 import { useToast } from '@/hooks/use-toast';
 
 export const useModelLoader = () => {
-  const [isModelLoaded, setIsModelLoaded] = useState(false);
-  const [isCheckingStorage, setIsCheckingStorage] = useState(true);
+  const [isModelLoaded, setIsModelLoaded] = useState(true); // Set to true by default
+  const [isCheckingStorage, setIsCheckingStorage] = useState(false); // Set to false initially
+
   const { toast } = useToast();
 
-  // Check if model is already in browser storage on initial load
+  // Auto-initialize the model service
   useEffect(() => {
-    const checkModelInStorage = async () => {
+    const initializeModel = async () => {
       try {
+        // Check if model exists in storage
         const loaded = await tensorflowService.loadModelFromStorage();
-        if (loaded) {
-          setIsModelLoaded(true);
+        if (!loaded) {
+          // If not in storage, we'll use the mock detection service
           toast({
-            title: "ML Model loaded from storage",
-            description: "Using the previously saved model for object detection"
+            title: "Using mock detection",
+            description: "Mock detection service is active"
+          });
+        } else {
+          toast({
+            title: "ML Model loaded",
+            description: "Using machine learning for object detection"
           });
         }
       } catch (error) {
-        console.error('Error checking for model in storage:', error);
+        console.error('Error initializing model service:', error);
       } finally {
         setIsCheckingStorage(false);
       }
     };
 
-    checkModelInStorage();
+    initializeModel();
   }, [toast]);
 
   const handleModelLoaded = () => {

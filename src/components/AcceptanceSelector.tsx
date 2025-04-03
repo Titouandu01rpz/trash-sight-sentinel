@@ -3,7 +3,7 @@ import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import RecyclingBin from './RecyclingBin';
-import { BinType, BINS } from '@/hooks/useTrashCategories';
+import { BINS } from '@/hooks/useTrashCategories';
 import ScrollAreaFixed from './ScrollAreaFixed';
 
 interface AcceptanceSelectorProps {
@@ -17,6 +17,7 @@ const AcceptanceSelector: React.FC<AcceptanceSelectorProps> = ({
   selectedBin, 
   onBinChange, 
   acceptedCategories, 
+  onAcceptedCategoriesChange 
 }) => {
   return (
     <div className="space-y-6 p-4 bg-muted/50 rounded-lg">

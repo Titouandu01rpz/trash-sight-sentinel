@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Recycle, Trash2, Ban, CheckCircle } from 'lucide-react';
+import { Recycle, Ban, CheckCircle } from 'lucide-react';
 
 interface StatisticsSectionProps {
   detectionCount: number;
@@ -13,7 +13,6 @@ interface StatisticsSectionProps {
 const StatisticsSection: React.FC<StatisticsSectionProps> = ({
   detectionCount,
   rejectionCount,
-  isModelLoaded,
   activeCategory
 }) => {
   const acceptanceRate = detectionCount > 0 
@@ -53,12 +52,6 @@ const StatisticsSection: React.FC<StatisticsSectionProps> = ({
         <CheckCircle size={14} className="text-primary" />
         <span>Accepted: {acceptanceRate}%</span>
       </Badge>
-      
-      {isModelLoaded && (
-        <Badge variant="secondary" className="ml-2 bg-secondary/80">
-          ML Active
-        </Badge>
-      )}
       
       {activeCategory && (
         <Badge variant="outline" className={`ml-2 ${getCategoryColor(activeCategory)}`}>

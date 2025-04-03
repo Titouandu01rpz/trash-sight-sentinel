@@ -1,63 +1,55 @@
 
 import React from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import RecyclingBin from './RecyclingBin';
+import { binTypes } from '@/hooks/useTrashCategories';
 
 interface AcceptanceSelectorProps {
-  trashType: string;
-  onTrashTypeChange: (value: string) => void;
+  selectedBin: string;
+  onBinChange: (value: string) => void;
   acceptedCategories: string[];
   onAcceptedCategoriesChange: (categories: string[]) => void;
 }
 
 const AcceptanceSelector: React.FC<AcceptanceSelectorProps> = ({ 
-  trashType, 
-  onTrashTypeChange, 
+  selectedBin, 
+  onBinChange, 
   acceptedCategories, 
-  onAcceptedCategoriesChange 
 }) => {
-  const handleCategoryToggle = (category: string) => {
-    if (acceptedCategories.includes(category)) {
-      onAcceptedCategoriesChange(acceptedCategories.filter(c => c !== category));
-    } else {
-      onAcceptedCategoriesChange([...acceptedCategories, category]);
-    }
-  };
-
   return (
-    <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+    <div className="space-y-6 p-4 bg-muted/50 rounded-lg">
       <div className="space-y-2">
-        <Label htmlFor="trash-type">Select Trash Color:</Label>
-        <Select value={trashType} onValueChange={onTrashTypeChange}>
-          <SelectTrigger id="trash-type">
-            <SelectValue placeholder="Select trash type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="dark">Dark Trash</SelectItem>
-            <SelectItem value="light">Light Trash</SelectItem>
-            <SelectItem value="colorful">Colorful Trash</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label className="text-lg font-semibold">Select a Recycling Bin</Label>
+        <p className="text-muted-foreground text-sm">Choose the type of waste you want to collect</p>
+
+        <ScrollArea className="w-full" orientation="horizontal">
+          <div className="flex space-x-4 py-4 px-1">
+            {binTypes.map(bin => (
+              <RecyclingBin 
+                key={bin.id} 
+                bin={bin} 
+                isSelected={selectedBin === bin.id}
+                onClick={() => onBinChange(bin.id)}
+              />
+            ))}
+          </div>
+        </ScrollArea>
       </div>
 
-      <div className="space-y-2">
-        <Label>Accept Only These Categories:</Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash'].map(category => (
-            <button
-              key={category}
-              onClick={() => handleCategoryToggle(category)}
-              className={`px-3 py-2 rounded text-sm ${
-                acceptedCategories.includes(category)
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground'
-              }`}
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Selected Bin Info</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {binTypes.find(bin => bin.id === selectedBin)?.description}
+          <div className="mt-2">
+            <span className="font-semibold">Accepts:</span>{" "}
+            <span className="italic">{acceptedCategories.join(', ')}</span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { CameraRef } from './Camera';
 import CameraPermissionDialog from './CameraPermissionDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Recycle, Trash2 } from 'lucide-react';
 
 // Import custom hooks
 import { useModelLoader } from '@/hooks/useModelLoader';
@@ -26,7 +27,7 @@ const Dashboard: React.FC = () => {
   
   // Use custom hooks
   const { isModelLoaded, isCheckingStorage, handleModelLoaded } = useModelLoader();
-  const { trashType, setTrashType, acceptedCategories, setAcceptedCategories } = useTrashCategories();
+  const { selectedBin, setSelectedBin, acceptedCategories, setAcceptedCategories } = useTrashCategories();
   const { 
     hasPermission, 
     showPermissionDialog, 
@@ -69,9 +70,18 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
-      <header className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-primary">Trash Sight Sentinel</h1>
-        <p className="text-muted-foreground">Real-time waste detection and sorting system</p>
+      <header className="text-center mb-8 relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -z-10 opacity-10">
+          <Recycle size={150} className="text-primary animate-float" />
+        </div>
+        <div className="flex justify-center items-center gap-2">
+          <Recycle size={32} className="text-primary recycling-icon" />
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            EcoSort Guardian
+          </h1>
+          <Trash2 size={28} className="text-accent" />
+        </div>
+        <p className="text-muted-foreground mt-2">Smart recycling detection and sorting assistant</p>
       </header>
 
       <CameraPermissionDialog
@@ -81,9 +91,12 @@ const Dashboard: React.FC = () => {
       />
 
       {!isModelLoaded && !isCheckingStorage && (
-        <Card className="mb-6">
+        <Card className="mb-6 border-dashed border-2 border-primary/50">
           <CardHeader>
-            <CardTitle>ML Model Required</CardTitle>
+            <CardTitle className="text-center flex items-center justify-center gap-2">
+              <Recycle className="text-primary" />
+              ML Model Required
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ModelUploader onModelLoaded={handleModelLoaded} />
@@ -93,10 +106,15 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
+          <Card className="overflow-hidden border-2 border-primary/20">
+            <CardHeader className="bg-primary/5">
               <div className="flex justify-between items-center flex-wrap">
-                <CardTitle>Camera Feed {isModelLoaded ? '(ML Active)' : '(Mock Data)'}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="p-1.5 bg-primary/10 rounded-full">
+                    <Recycle size={20} className="text-primary" />
+                  </div>
+                  Camera Feed {isModelLoaded ? '(ML Active)' : '(Mock Data)'}
+                </CardTitle>
                 <StatisticsSection 
                   detectionCount={detectionCount}
                   rejectionCount={rejectionCount}
@@ -105,7 +123,7 @@ const Dashboard: React.FC = () => {
                 />
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <CameraSection 
                 cameraRef={cameraRef}
                 onFrame={handleFrame}
@@ -125,14 +143,14 @@ const Dashboard: React.FC = () => {
 
         <div className="space-y-6">
           <SettingsCard 
-            trashType={trashType}
-            onTrashTypeChange={setTrashType}
+            selectedBin={selectedBin}
+            onBinChange={setSelectedBin}
             acceptedCategories={acceptedCategories}
             onAcceptedCategoriesChange={setAcceptedCategories}
           />
 
           <SettingsDisplay 
-            trashType={trashType}
+            selectedBin={selectedBin}
             acceptedCategories={acceptedCategories}
           />
         </div>

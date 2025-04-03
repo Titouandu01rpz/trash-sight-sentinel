@@ -63,13 +63,27 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Category-specific colors
-				cardboard: '#C68E17',
-				glass: '#86C3D0',
-				metal: '#71797E',
-				paper: '#F1E4C3',
-				plastic: '#FFCC00',
-				trash: '#3A4035',
+				// Recycling bin colors
+				bin: {
+					green: '#4CAF50',    // Glass
+					yellow: '#FFEB3B',   // Plastic & Packaging
+					blue: '#2196F3',     // Paper
+					red: '#F44336',      // Metal
+					gray: '#9E9E9E',     // Regular waste
+					brown: '#795548',    // Organic waste
+					purple: '#9C27B0',   // Batteries
+					white: '#FFFFFF',    // Cups
+				},
+				// Updated category colors
+				cardboard: '#E3A76F',   // More natural cardboard color
+				glass: '#88D8C0',       // Softer glass color
+				metal: '#A1A1AA',       // Metallic color
+				paper: '#90CAF9',       // Blue paper color
+				plastic: '#FFEE58',     // Bright yellow plastic
+				trash: '#757575',       // Dark gray for general trash
+				organic: '#8D6E63',     // Brown for organic waste
+				battery: '#CE93D8',     // Purple for batteries
+				cups: '#ECEFF1',        // Light gray for cups
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -96,12 +110,25 @@ export default {
 				'pulse-red': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.5' },
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' },
+				},
+				'spin-slow': {
+					'0%': { transform: 'rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg)' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-red': 'pulse-red 1s ease-in-out infinite',
+				'float': 'float 3s ease-in-out infinite',
+				'spin-slow': 'spin-slow 8s linear infinite',
+			},
+			backgroundImage: {
+				'recycling-pattern': "url('/recycling-pattern.svg')",
 			}
 		}
 	},

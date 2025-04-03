@@ -1,7 +1,8 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, CameraIcon, RefreshCw } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface CameraProps {
   onFrame: (imageData: ImageData) => void;
@@ -26,6 +27,7 @@ const Camera = React.forwardRef<CameraRef, CameraProps>(({
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
 
   // Make startCamera accessible to parent components via a ref
   const startCamera = async () => {
@@ -36,7 +38,7 @@ const Camera = React.forwardRef<CameraRef, CameraProps>(({
       
       const newStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
-          facingMode: 'environment',
+          facingMode: facingMode,
           width: { ideal: 640 },
           height: { ideal: 480 }
         } 
@@ -57,10 +59,42 @@ const Camera = React.forwardRef<CameraRef, CameraProps>(({
     }
   };
 
+  // Function to switch camera between front and back
+  const switchCamera = async () => {
+    // Toggle facing mode
+    const newFacingMode = facingMode === 'environment' ? 'user' : 'environment';
+    setFacingMode(newFacingMode);
+    
+    // Restart camera with new facing mode
+    if (hasPermission) {
+      try {
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+        }
+        
+        const newStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: newFacingMode,
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          } 
+        });
+        
+        setStream(newStream);
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = newStream;
+        }
+      } catch (error) {
+        console.error('Error switching camera:', error);
+      }
+    }
+  };
+
   // Expose startCamera method to parent using React.forwardRef
   React.useImperativeHandle(ref, () => ({
     startCamera
-  }), [stream]);
+  }), [stream, facingMode]);
 
   useEffect(() => {
     // Don't automatically start camera on component mount
@@ -115,6 +149,11 @@ const Camera = React.forwardRef<CameraRef, CameraProps>(({
 
   }, [hasPermission, onFrame, isPaused]);
 
+  // Check if we're on a mobile device
+  const isMobile = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
   if (hasPermission === false) {
     return (
       <div className="relative w-full h-64 md:h-96 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -136,6 +175,18 @@ const Camera = React.forwardRef<CameraRef, CameraProps>(({
         ref={canvasRef} 
         className="hidden" 
       />
+      
+      {/* Camera switch button - only shown on mobile devices */}
+      {hasPermission && isMobile() && (
+        <Button 
+          variant="outline" 
+          size="icon"
+          className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full z-10"
+          onClick={switchCamera}
+        >
+          <RefreshCw size={20} />
+        </Button>
+      )}
       
       {/* Rejection overlay */}
       {showRejection && (

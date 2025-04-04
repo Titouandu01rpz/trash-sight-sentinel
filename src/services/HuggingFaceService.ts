@@ -16,7 +16,6 @@ const LABEL_TO_CATEGORY_MAP: Record<string, WasteCategory> = {
   'Shoes': 'shoes',
   'Clothes': 'clothes',
   'Cups': 'cups'
-  // Add mappings for other categories as needed
 };
 
 // Define the structure of the classifier output for better type safety
@@ -92,6 +91,7 @@ class HuggingFaceService {
         .filter((result: ClassificationResult) => result.score > 0.4) // Filter by confidence threshold
         .map((result: ClassificationResult) => {
           const label = result.label;
+          // Handle the type safely
           const wasteCategory = LABEL_TO_CATEGORY_MAP[label] || 'trash';
           
           // Create a bounding box positioned in the middle of the frame
@@ -103,7 +103,7 @@ class HuggingFaceService {
           const bbox: BoundingBox = { x, y, width, height };
           
           return {
-            class: wasteCategory as any, // Type assertion to match the Detection type
+            class: wasteCategory,
             confidence: result.score,
             bbox
           };

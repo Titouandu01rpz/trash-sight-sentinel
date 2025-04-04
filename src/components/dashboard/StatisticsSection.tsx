@@ -23,16 +23,23 @@ const StatisticsSection: React.FC<StatisticsSectionProps> = ({
   const getCategoryColor = (category?: string | null) => {
     if (!category) return "";
     
+    // Simplified color scheme for the new 3-bin system
     switch (category) {
-      case 'cardboard': return 'bg-cardboard text-black';
-      case 'glass': return 'bg-glass text-black';
-      case 'metal': return 'bg-metal text-white';
-      case 'paper': return 'bg-paper text-black';
-      case 'plastic': return 'bg-plastic text-black';
-      case 'organic': return 'bg-organic text-white';
-      case 'battery': return 'bg-battery text-white';
-      case 'cups': return 'bg-cups text-black';
-      default: return 'bg-trash text-white';
+      case 'cardboard':
+      case 'glass':
+      case 'metal':
+      case 'paper':
+      case 'plastic':
+        return 'bg-yellow-400 text-black'; // Recyclables (yellow bin)
+      case 'cups':
+        return 'bg-purple-600 text-white'; // Reusable cups (purple bin)
+      case 'organic':
+      case 'trash':
+      case 'battery':
+      case 'clothes':
+      case 'shoes':
+      default:
+        return 'bg-gray-900 text-white'; // General waste (black bin)
     }
   };
 

@@ -13,41 +13,24 @@ const InformationAlert: React.FC = () => {
       <AlertDescription className="mt-2 space-y-2">
         <p>
           This system detects and classifies waste into different categories, helping you sort items 
-          into the correct recycling bins. Each colored bin accepts specific types of waste:
+          into the correct recycling bins:
         </p>
         
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mt-2">
+        <div className="grid gap-x-4 gap-y-2 text-sm mt-2">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-bin-green"></div>
-            <span>Green: Glass items</span>
+            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+            <span className="font-semibold">Yellow Bin - Recyclables:</span>
+            <span className="text-muted-foreground">Plastic, cardboard, paper, metal, and glass items</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-bin-yellow"></div>
-            <span>Yellow: Plastic & packaging</span>
+            <div className="w-3 h-3 rounded-full bg-purple-600"></div>
+            <span className="font-semibold">Purple Bin - Reusable Cups:</span>
+            <span className="text-muted-foreground">Specific reusable cups that will be washed and reused</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-bin-blue"></div>
-            <span>Blue: Paper & cardboard</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-bin-red"></div>
-            <span>Red: Metal items</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-bin-gray"></div>
-            <span>Gray: General waste</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-bin-brown"></div>
-            <span>Brown: Organic waste</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-bin-purple"></div>
-            <span>Purple: Batteries</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-bin-white border"></div>
-            <span>White: Cups</span>
+            <div className="w-3 h-3 rounded-full bg-gray-900"></div>
+            <span className="font-semibold">Black Bin - General Waste:</span>
+            <span className="text-muted-foreground">Food scraps, tissues, and non-recyclable items</span>
           </div>
         </div>
         

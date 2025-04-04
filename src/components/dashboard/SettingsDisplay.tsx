@@ -16,6 +16,14 @@ const SettingsDisplay: React.FC<SettingsDisplayProps> = ({
 }) => {
   const currentBin = BINS.find(bin => bin.id === selectedBin) as BinType;
   
+  // Get badge color based on category and bin system
+  const getCategoryBadgeColor = (category: string, binId: string) => {
+    if (binId === 'yellow') return 'bg-yellow-400 text-black';
+    if (binId === 'purple') return 'bg-purple-600 text-white';
+    if (binId === 'black') return 'bg-gray-900 text-white';
+    return '';
+  };
+  
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -41,27 +49,14 @@ const SettingsDisplay: React.FC<SettingsDisplayProps> = ({
           <div>
             <span className="font-medium">Accepted Categories:</span>
             <div className="flex flex-wrap gap-1 mt-1">
-              {acceptedCategories.map(category => {
-                // Find category color
-                let color;
-                switch (category) {
-                  case 'cardboard': color = 'bg-cardboard text-black'; break;
-                  case 'glass': color = 'bg-glass text-black'; break;
-                  case 'metal': color = 'bg-metal text-white'; break;
-                  case 'paper': color = 'bg-paper text-black'; break;
-                  case 'plastic': color = 'bg-plastic text-black'; break;
-                  case 'organic': color = 'bg-organic text-white'; break;
-                  case 'battery': color = 'bg-battery text-white'; break;
-                  case 'cups': color = 'bg-cups text-black'; break;
-                  case 'trash': default: color = 'bg-trash text-white';
-                }
-                
-                return (
-                  <Badge key={category} className={color}>
-                    {category}
-                  </Badge>
-                );
-              })}
+              {acceptedCategories.map(category => (
+                <Badge 
+                  key={category} 
+                  className={getCategoryBadgeColor(category, selectedBin)}
+                >
+                  {category}
+                </Badge>
+              ))}
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 
-export type WasteCategory = 'glass' | 'plastic' | 'cardboard' | 'paper' | 'metal' | 'trash' | 'organic' | 'battery' | 'clothes' | 'shoes';
+export type WasteCategory = 'glass' | 'plastic' | 'cardboard' | 'paper' | 'metal' | 'trash' | 'organic' | 'battery' | 'clothes' | 'shoes' | 'cups';
 
 export type BinType = {
   id: string;

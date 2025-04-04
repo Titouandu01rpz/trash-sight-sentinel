@@ -1,5 +1,5 @@
 
-import { pipeline, type Pipeline } from '@huggingface/transformers';
+import { pipeline, type Pipeline, ImageClassificationPipeline } from '@huggingface/transformers';
 import { WasteCategory } from '@/hooks/useTrashCategories';
 import { Detection, BoundingBox } from './DetectionService';
 
@@ -13,13 +13,15 @@ const LABEL_TO_CATEGORY_MAP: Record<string, WasteCategory> = {
   'Paper': 'paper',
   'Plastic': 'plastic',
   'Trash': 'trash',
+  'Shoes': 'shoes',
+  'Clothes': 'clothes',
   // Add mappings for other categories as needed
 };
 
 class HuggingFaceService {
-  private classificationPipeline: Pipeline | null = null;
+  private classificationPipeline: ImageClassificationPipeline | null = null;
   private isModelLoading: boolean = false;
-  private modelLoadPromise: Promise<Pipeline> | null = null;
+  private modelLoadPromise: Promise<ImageClassificationPipeline> | null = null;
 
   constructor() {
     console.log('HuggingFace service initialized');
@@ -40,7 +42,7 @@ class HuggingFaceService {
       this.modelLoadPromise = pipeline(
         'image-classification',
         'prithivMLmods/Augmented-Waste-Classifier-SigLIP2'
-      );
+      ) as Promise<ImageClassificationPipeline>;
       
       this.classificationPipeline = await this.modelLoadPromise;
       this.isModelLoading = false;

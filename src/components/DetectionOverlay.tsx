@@ -23,20 +23,19 @@ const DetectionOverlay: React.FC<DetectionOverlayProps> = ({ detections, width, 
         
         // Get color based on waste category
         let color;
-        const wasteCategory = category as WasteCategory;
-        switch (wasteCategory) {
-          case 'cardboard': color = '#E3A76F'; break;
-          case 'glass': color = '#88D8C0'; break;
-          case 'metal': color = '#A1A1AA'; break;
-          case 'paper': color = '#90CAF9'; break;
-          case 'plastic': color = '#FFEE58'; break;
-          case 'organic': color = '#8D6E63'; break;
-          case 'battery': color = '#CE93D8'; break;
-          case 'clothes': color = '#EC407A'; break;
-          case 'shoes': color = '#212121'; break;
-          case 'cups': color = '#ECEFF1'; break;
-          case 'trash': 
-          default: color = '#757575'; break;
+        
+        // Map category to one of our three bin categories
+        switch (category) {
+          case 'recyclables': 
+            color = '#FFEB3B'; // Yellow for recyclables
+            break;
+          case 'reusable-cups': 
+            color = '#9C27B0'; // Purple for reusable cups
+            break;
+          case 'general-waste': 
+          default: 
+            color = '#757575'; // Gray for general waste
+            break;
         }
 
         return (

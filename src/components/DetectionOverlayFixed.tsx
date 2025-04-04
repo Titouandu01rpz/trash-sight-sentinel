@@ -19,26 +19,13 @@ interface DetectionOverlayProps {
 
 const getCategoryColor = (category: WasteCategory): string => {
   switch (category) {
-    case 'glass':
-      return '#88D8C0';
-    case 'plastic':
-      return '#FFEE58';
-    case 'cardboard':
-      return '#E3A76F';
-    case 'paper':
-      return '#90CAF9';
-    case 'metal':
-      return '#A1A1AA';
-    case 'trash':
-      return '#757575';
-    case 'organic':
-      return '#8D6E63';
-    case 'battery':
-      return '#CE93D8';
-    case 'cups':
-      return '#ECEFF1';
+    case 'recyclables':
+      return '#FFEB3B'; // Yellow for recyclables
+    case 'reusable-cups':
+      return '#9C27B0'; // Purple for reusable cups
+    case 'general-waste':
     default:
-      return '#FFFFFF';
+      return '#757575'; // Gray for general waste
   }
 };
 

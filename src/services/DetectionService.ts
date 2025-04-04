@@ -1,5 +1,7 @@
 
 // Mock detection service (to be replaced with real TensorFlow.js implementation)
+import { WasteCategory } from '@/hooks/useTrashCategories';
+
 export interface BoundingBox {
   x: number;
   y: number;
@@ -8,7 +10,7 @@ export interface BoundingBox {
 }
 
 export interface Detection {
-  class: 'cardboard' | 'glass' | 'metal' | 'paper' | 'plastic' | 'trash';
+  class: WasteCategory;
   confidence: number;
   bbox: BoundingBox;
 }
@@ -18,8 +20,8 @@ export interface Detection {
 export class DetectionService {
   private mockDetectionInterval: number = 2000; // ms
   private lastDetectionTime: number = 0;
-  private categories: Array<'cardboard' | 'glass' | 'metal' | 'paper' | 'plastic' | 'trash'> = [
-    'cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash'
+  private categories: WasteCategory[] = [
+    'cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash', 'organic', 'battery', 'clothes', 'shoes', 'cups'
   ];
 
   constructor() {

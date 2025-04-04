@@ -1,5 +1,5 @@
 
-import { pipeline, type ImageClassificationPipeline } from '@huggingface/transformers';
+import { pipeline } from '@huggingface/transformers';
 import { WasteCategory } from '@/hooks/useTrashCategories';
 import { Detection, BoundingBox } from './DetectionService';
 
@@ -25,9 +25,9 @@ interface ClassificationResult {
 }
 
 class HuggingFaceService {
-  private classificationPipeline: ImageClassificationPipeline | null = null;
+  private classificationPipeline: any = null;
   private isModelLoading: boolean = false;
-  private modelLoadPromise: Promise<ImageClassificationPipeline> | null = null;
+  private modelLoadPromise: Promise<any> | null = null;
 
   constructor() {
     console.log('HuggingFace service initialized');
@@ -48,7 +48,7 @@ class HuggingFaceService {
       this.modelLoadPromise = pipeline(
         'image-classification',
         'Xenova/waste-classification-13'  // Using a compatible model instead
-      ) as Promise<ImageClassificationPipeline>;
+      );
       
       this.classificationPipeline = await this.modelLoadPromise;
       this.isModelLoading = false;
@@ -82,7 +82,7 @@ class HuggingFaceService {
       const imageUrl = canvas.toDataURL();
 
       // Run prediction
-      const results = await this.classificationPipeline!(imageUrl);
+      const results = await this.classificationPipeline(imageUrl);
       
       if (!Array.isArray(results) || results.length === 0) return [];
 
@@ -91,8 +91,8 @@ class HuggingFaceService {
         .filter((result: ClassificationResult) => result.score > 0.4) // Filter by confidence threshold
         .map((result: ClassificationResult) => {
           const label = result.label;
-          // Handle the type safely
-          const wasteCategory = LABEL_TO_CATEGORY_MAP[label] || 'trash';
+          // Map the model label to our waste category or default to 'trash'
+          const wasteCategoryKey = LABEL_TO_CATEGORY_MAP[label] || 'trash';
           
           // Create a bounding box positioned in the middle of the frame
           const width = imageData.width * 0.5;
@@ -103,7 +103,7 @@ class HuggingFaceService {
           const bbox: BoundingBox = { x, y, width, height };
           
           return {
-            class: wasteCategory,
+            class: wasteCategoryKey,
             confidence: result.score,
             bbox
           };

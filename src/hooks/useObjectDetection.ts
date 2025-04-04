@@ -8,7 +8,6 @@ import huggingFaceService from '@/services/HuggingFaceService';
 interface UseObjectDetectionProps {
   isPaused: boolean;
   acceptedCategories: string[];
-  isModelLoaded: boolean;
 }
 
 export const useObjectDetection = ({ 
@@ -25,7 +24,6 @@ export const useObjectDetection = ({
     // Update frame size
     detectionResults.updateFrameSize(imageData.width, imageData.height);
     
-    // Process frame with the appropriate detection service
     try {
       // Use Hugging Face if available, otherwise fall back to mock detection
       const newDetections = detectionModel.useHuggingFace 
@@ -35,8 +33,6 @@ export const useObjectDetection = ({
       if (newDetections.length > 0) {
         detectionResults.updateDetections(newDetections);
         detectionResults.incrementDetectionCount();
-        
-        // Check for rejection conditions - only closest object should trigger rejection
         
         // Sort detections by size (largest first - assuming closer to camera)
         const sortedDetections = [...newDetections].sort((a, b) => {

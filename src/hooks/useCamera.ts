@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export const useCamera = (onFrame: (imageData: ImageData) => void, isPaused: boolean) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -10,7 +10,7 @@ export const useCamera = (onFrame: (imageData: ImageData) => void, isPaused: boo
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
 
   // Function to start camera
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     try {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -35,15 +35,13 @@ export const useCamera = (onFrame: (imageData: ImageData) => void, isPaused: boo
       setHasPermission(false);
       setErrorMessage('Camera access denied. Please allow camera permissions and try again.');
     }
-  };
+  }, [facingMode, stream]);
 
   // Function to switch camera between front and back
-  const switchCamera = async () => {
-    // Toggle facing mode
+  const switchCamera = useCallback(async () => {
     const newFacingMode = facingMode === 'environment' ? 'user' : 'environment';
     setFacingMode(newFacingMode);
     
-    // Restart camera with new facing mode
     if (hasPermission) {
       try {
         if (stream) {
@@ -67,7 +65,7 @@ export const useCamera = (onFrame: (imageData: ImageData) => void, isPaused: boo
         console.error('Error switching camera:', error);
       }
     }
-  };
+  }, [facingMode, hasPermission, stream]);
 
   // Process frames from the camera
   useEffect(() => {
@@ -118,9 +116,9 @@ export const useCamera = (onFrame: (imageData: ImageData) => void, isPaused: boo
   }, [hasPermission, onFrame, isPaused, stream]);
 
   // Check if we're on a mobile device
-  const isMobile = () => {
+  const isMobile = useCallback(() => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  };
+  }, []);
 
   return {
     videoRef,

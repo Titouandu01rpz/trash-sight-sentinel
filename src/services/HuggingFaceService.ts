@@ -5,17 +5,17 @@ import { Detection, BoundingBox } from './DetectionService';
 
 // Map model output labels to our application's waste categories
 const LABEL_TO_CATEGORY_MAP: Record<string, WasteCategory> = {
-  'Battery': 'battery',
-  'Biological': 'organic',
-  'Cardboard': 'cardboard',
-  'Glass': 'glass',
-  'Metal': 'metal',
-  'Paper': 'paper',
-  'Plastic': 'plastic',
-  'Trash': 'trash',
-  'Shoes': 'shoes',
-  'Clothes': 'clothes',
-  'Cups': 'cups'
+  'Battery': 'recyclables',
+  'Biological': 'general-waste',
+  'Cardboard': 'recyclables',
+  'Glass': 'recyclables',
+  'Metal': 'recyclables',
+  'Paper': 'recyclables',
+  'Plastic': 'recyclables',
+  'Trash': 'general-waste',
+  'Shoes': 'general-waste',
+  'Clothes': 'general-waste',
+  'Cups': 'reusable-cups'
 };
 
 // Define the structure of the classifier output for better type safety
@@ -47,7 +47,7 @@ class HuggingFaceService {
       // Create the classification pipeline
       this.modelLoadPromise = pipeline(
         'image-classification',
-        'Xenova/waste-classification-13'  // Using a compatible model instead
+        'Xenova/waste-classification-13'
       );
       
       this.classificationPipeline = await this.modelLoadPromise;
@@ -71,7 +71,6 @@ class HuggingFaceService {
     }
 
     try {
-      // Create a canvas to convert ImageData to an image URL
       const canvas = document.createElement('canvas');
       canvas.width = imageData.width;
       canvas.height = imageData.height;
@@ -88,11 +87,10 @@ class HuggingFaceService {
 
       // Convert results to our Detection format
       const detections: Detection[] = results
-        .filter((result: ClassificationResult) => result.score > 0.4) // Filter by confidence threshold
+        .filter((result: ClassificationResult) => result.score > 0.4)
         .map((result: ClassificationResult) => {
           const label = result.label;
-          // Map the model label to our waste category or default to 'trash'
-          const wasteCategoryKey = LABEL_TO_CATEGORY_MAP[label] || 'trash';
+          const wasteCategoryKey = LABEL_TO_CATEGORY_MAP[label] || 'general-waste';
           
           // Create a bounding box positioned in the middle of the frame
           const width = imageData.width * 0.5;

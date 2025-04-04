@@ -7,7 +7,6 @@ export const useDetectionModel = () => {
   const [useHuggingFace, setUseHuggingFace] = useState(false);
   const { toast } = useToast();
   
-  // Initialize HuggingFace model on component mount
   useEffect(() => {
     const initHuggingFace = async () => {
       try {

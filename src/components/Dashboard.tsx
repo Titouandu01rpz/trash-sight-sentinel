@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Recycle, Trash2 } from 'lucide-react';
 
 // Import custom hooks
-import { useModelLoader } from '@/hooks/useModelLoader';
 import { useTrashCategories, WasteCategory } from '@/hooks/useTrashCategories';
 import { useCameraPermission } from '@/hooks/useCameraPermission';
 import { useObjectDetection } from '@/hooks/useObjectDetection';
@@ -25,7 +24,6 @@ const Dashboard: React.FC = () => {
   const cameraRef = useRef<CameraRef>(null);
   
   // Use custom hooks
-  const { isModelLoaded, isCheckingStorage } = useModelLoader();
   const { selectedBin, setSelectedBin, acceptedCategories, setAcceptedCategories } = useTrashCategories();
   const { 
     hasPermission, 
@@ -47,8 +45,7 @@ const Dashboard: React.FC = () => {
     useHuggingFace
   } = useObjectDetection({
     isPaused,
-    acceptedCategories,
-    isModelLoaded
+    acceptedCategories
   });
 
   // When rejection is detected, pause processing briefly
@@ -68,7 +65,6 @@ const Dashboard: React.FC = () => {
     handleRequestPermission(cameraRef);
   };
 
-  // Type converter function to handle string[] to WasteCategory[]
   const handleAcceptedCategoriesChange = (categories: string[]) => {
     setAcceptedCategories(categories as WasteCategory[]);
   };
@@ -112,7 +108,7 @@ const Dashboard: React.FC = () => {
                 <StatisticsSection 
                   detectionCount={detectionCount}
                   rejectionCount={rejectionCount}
-                  isModelLoaded={useHuggingFace || isModelLoaded}
+                  isModelLoaded={useHuggingFace}
                   activeCategory={activeDetection}
                 />
               </div>

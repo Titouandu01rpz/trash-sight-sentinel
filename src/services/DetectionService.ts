@@ -16,12 +16,11 @@ export interface Detection {
 }
 
 // This is a mock service that simulates detections
-// In a real implementation, this would use TensorFlow.js to run the actual model
 export class DetectionService {
   private mockDetectionInterval: number = 2000; // ms
   private lastDetectionTime: number = 0;
   private categories: WasteCategory[] = [
-    'cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash', 'organic', 'battery', 'clothes', 'shoes', 'cups'
+    'recyclables', 'reusable-cups', 'general-waste'
   ];
 
   constructor() {
@@ -29,7 +28,6 @@ export class DetectionService {
   }
 
   // Mock detection function
-  // In a real implementation, this would process the frame with TensorFlow.js
   public async detectObjects(imageData: ImageData): Promise<Detection[]> {
     const currentTime = Date.now();
     

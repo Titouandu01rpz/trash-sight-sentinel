@@ -15,9 +15,7 @@ interface AcceptanceSelectorProps {
 }
 
 // All available waste categories
-const ALL_CATEGORIES: WasteCategory[] = [
-  'glass', 'plastic', 'cardboard', 'paper', 'metal', 'trash', 'organic', 'battery', 'clothes', 'shoes', 'cups'
-];
+const ALL_CATEGORIES: WasteCategory[] = ['recyclables', 'reusable-cups', 'general-waste'];
 
 const AcceptanceSelector: React.FC<AcceptanceSelectorProps> = ({ 
   selectedBin, 
@@ -63,7 +61,7 @@ const AcceptanceSelector: React.FC<AcceptanceSelectorProps> = ({
           {BINS.find(bin => bin.id === selectedBin)?.description}
           <div className="mt-4">
             <Label className="text-base font-medium">Accepted Categories:</Label>
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2 grid grid-cols-1 gap-2">
               {ALL_CATEGORIES.map((category) => (
                 <div key={category} className="flex items-center space-x-2">
                   <Checkbox 

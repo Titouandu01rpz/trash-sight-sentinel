@@ -25,20 +25,6 @@ export const useDetectionResults = () => {
     }
   };
   
-  const updateFrameSize = (width: number, height: number) => {
-    if (width !== frameSize.width || height !== frameSize.height) {
-      setFrameSize({ width, height });
-    }
-  };
-  
-  const incrementDetectionCount = () => {
-    setDetectionCount(prev => prev + 1);
-  };
-  
-  const incrementRejectionCount = () => {
-    setRejectionCount(prev => prev + 1);
-  };
-  
   return {
     detections,
     activeDetection,
@@ -46,8 +32,12 @@ export const useDetectionResults = () => {
     detectionCount,
     rejectionCount,
     updateDetections,
-    updateFrameSize,
-    incrementDetectionCount,
-    incrementRejectionCount
+    updateFrameSize: (width: number, height: number) => {
+      if (width !== frameSize.width || height !== frameSize.height) {
+        setFrameSize({ width, height });
+      }
+    },
+    incrementDetectionCount: () => setDetectionCount(prev => prev + 1),
+    incrementRejectionCount: () => setRejectionCount(prev => prev + 1)
   };
 };

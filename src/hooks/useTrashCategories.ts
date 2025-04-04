@@ -1,61 +1,63 @@
 
 import { useState } from 'react';
 
-export type WasteCategory = 'glass' | 'plastic' | 'cardboard' | 'paper' | 'metal' | 'trash' | 'organic' | 'battery' | 'clothes' | 'shoes' | 'cups';
+// Define the waste categories
+export type WasteCategory = 'recyclables' | 'reusable-cups' | 'general-waste';
 
-export type BinType = {
+// Define the bin types
+export interface BinType {
   id: string;
   name: string;
   color: string;
   description: string;
-};
+  defaultCategories: WasteCategory[];
+}
 
-// Simplified bins - just 3 as requested
+// Define the available bins
 export const BINS: BinType[] = [
-  { 
-    id: 'yellow', 
-    name: 'Recyclables', 
-    color: '#FFEB3B', 
-    description: 'All packaging that can be recycled including plastic bottles, cardboard, paper, metal cans, and glass.' 
+  {
+    id: 'yellow-bin',
+    name: 'Yellow Bin',
+    color: 'yellow',
+    description: 'For all packaging and recyclables including plastic bottles, cans, cardboard, and paper.',
+    defaultCategories: ['recyclables']
   },
-  { 
-    id: 'purple', 
-    name: 'Reusable Cups', 
-    color: '#9C27B0', 
-    description: 'Specific reusable cups that will be washed and reused, not thrown away.' 
+  {
+    id: 'purple-bin',
+    name: 'Purple Bin',
+    color: 'purple',
+    description: 'For reusable cups that can be washed and reused on campus.',
+    defaultCategories: ['reusable-cups']
   },
-  { 
-    id: 'black', 
-    name: 'General Waste', 
-    color: '#212121', 
-    description: 'Food scraps, tissues, and items that cannot be recycled.' 
-  },
+  {
+    id: 'black-bin',
+    name: 'Black Bin',
+    color: 'black',
+    description: 'For general waste including food scraps, tissues, and non-recyclable items.',
+    defaultCategories: ['general-waste']
+  }
 ];
-
-// Export BINS as binTypes for backward compatibility
-export const binTypes = BINS;
-
-// Default categories for each bin
-const DEFAULT_CATEGORIES: Record<string, WasteCategory[]> = {
-  yellow: ['plastic', 'cardboard', 'paper', 'metal', 'glass'],
-  purple: ['cups'],
-  black: ['trash', 'organic', 'battery', 'clothes', 'shoes'],
-};
 
 export const useTrashCategories = () => {
   const [selectedBin, setSelectedBin] = useState<string>(BINS[0].id);
-  const [acceptedCategories, setAcceptedCategories] = useState<WasteCategory[]>(DEFAULT_CATEGORIES[BINS[0].id]);
+  const [acceptedCategories, setAcceptedCategories] = useState<WasteCategory[]>(
+    BINS[0].defaultCategories
+  );
 
-  const handleBinChange = (binId: string) => {
+  const updateSelectedBin = (binId: string) => {
     setSelectedBin(binId);
-    // Set default accepted categories for the selected bin
-    setAcceptedCategories(DEFAULT_CATEGORIES[binId]);
+    
+    // Find the selected bin
+    const bin = BINS.find(b => b.id === binId);
+    if (bin) {
+      // Set the accepted categories based on the bin's default categories
+      setAcceptedCategories(bin.defaultCategories);
+    }
   };
 
   return {
-    bins: BINS,
     selectedBin,
-    setSelectedBin: handleBinChange,
+    setSelectedBin: updateSelectedBin,
     acceptedCategories,
     setAcceptedCategories
   };

@@ -16,7 +16,7 @@ interface AcceptanceSelectorProps {
 
 // All available waste categories
 const ALL_CATEGORIES: WasteCategory[] = [
-  'glass', 'plastic', 'cardboard', 'paper', 'metal', 'trash', 'organic', 'battery', 'cups'
+  'glass', 'plastic', 'cardboard', 'paper', 'metal', 'trash', 'organic', 'battery', 'clothes', 'shoes', 'cups'
 ];
 
 const AcceptanceSelector: React.FC<AcceptanceSelectorProps> = ({ 

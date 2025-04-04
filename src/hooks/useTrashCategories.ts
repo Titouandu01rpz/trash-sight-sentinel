@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 
-export type WasteCategory = 'glass' | 'plastic' | 'cardboard' | 'paper' | 'metal' | 'trash' | 'organic' | 'battery' | 'cups';
+export type WasteCategory = 'glass' | 'plastic' | 'cardboard' | 'paper' | 'metal' | 'trash' | 'organic' | 'battery' | 'clothes' | 'shoes';
 
 export type BinType = {
   id: string;
@@ -18,6 +18,8 @@ export const BINS: BinType[] = [
   { id: 'gray', name: 'Regular Waste', color: '#9E9E9E', description: 'For general non-recyclable waste.' },
   { id: 'brown', name: 'Organic Waste', color: '#795548', description: 'For food scraps and biodegradable waste.' },
   { id: 'purple', name: 'Batteries', color: '#9C27B0', description: 'For used batteries and similar items.' },
+  { id: 'pink', name: 'Clothes', color: '#EC407A', description: 'For clothing and textile items.' },
+  { id: 'black', name: 'Shoes', color: '#212121', description: 'For footwear.' },
   { id: 'white', name: 'Cups', color: '#FFFFFF', description: 'For disposable cups and similar items.' },
 ];
 
@@ -32,6 +34,8 @@ const DEFAULT_CATEGORIES: Record<string, WasteCategory[]> = {
   gray: ['trash'],
   brown: ['organic'],
   purple: ['battery'],
+  pink: ['clothes'],
+  black: ['shoes'],
   white: ['cups'],
 };
 

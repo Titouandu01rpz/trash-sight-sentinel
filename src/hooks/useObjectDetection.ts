@@ -2,7 +2,9 @@
 import { useState, useEffect } from 'react';
 import { Detection } from '@/services/DetectionService';
 import detectionService from '@/services/DetectionService';
+import huggingFaceService from '@/services/HuggingFaceService';
 import audioService from '@/services/AudioService';
+import { useToast } from '@/hooks/use-toast';
 
 interface UseObjectDetectionProps {
   isPaused: boolean;
@@ -20,6 +22,28 @@ export const useObjectDetection = ({
   const [showRejection, setShowRejection] = useState(false);
   const [detectionCount, setDetectionCount] = useState(0);
   const [rejectionCount, setRejectionCount] = useState(0);
+  const [useHuggingFace, setUseHuggingFace] = useState(false);
+  const { toast } = useToast();
+  
+  // Initialize HuggingFace model on component mount
+  useEffect(() => {
+    const initHuggingFace = async () => {
+      try {
+        const success = await huggingFaceService.initModel();
+        if (success) {
+          setUseHuggingFace(true);
+          toast({
+            title: "AI Model Loaded",
+            description: "Using Hugging Face model for waste classification"
+          });
+        }
+      } catch (error) {
+        console.error("Error initializing Hugging Face model:", error);
+      }
+    };
+    
+    initHuggingFace();
+  }, [toast]);
   
   const handleFrame = async (imageData: ImageData) => {
     if (isPaused) return;
@@ -29,10 +53,12 @@ export const useObjectDetection = ({
       setFrameSize({ width: imageData.width, height: imageData.height });
     }
     
-    // Process frame with detection service
+    // Process frame with the appropriate detection service
     try {
-      // Use mock detection service
-      const newDetections = await detectionService.detectObjects(imageData);
+      // Use Hugging Face if available, otherwise fall back to mock detection
+      const newDetections = useHuggingFace 
+        ? await huggingFaceService.detectObjects(imageData)
+        : await detectionService.detectObjects(imageData);
       
       if (newDetections.length > 0) {
         // Track active detection
@@ -103,6 +129,7 @@ export const useObjectDetection = ({
     setShowRejection,
     detectionCount,
     rejectionCount,
-    handleFrame
+    handleFrame,
+    useHuggingFace
   };
 };

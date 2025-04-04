@@ -32,6 +32,8 @@ const DetectionOverlay: React.FC<DetectionOverlayProps> = ({ detections, width, 
           case 'plastic': color = '#FFEE58'; break;
           case 'organic': color = '#8D6E63'; break;
           case 'battery': color = '#CE93D8'; break;
+          case 'clothes': color = '#EC407A'; break;
+          case 'shoes': color = '#212121'; break;
           case 'cups': color = '#ECEFF1'; break;
           case 'trash': 
           default: color = '#757575'; break;

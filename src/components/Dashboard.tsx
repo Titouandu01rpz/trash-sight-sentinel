@@ -43,7 +43,8 @@ const Dashboard: React.FC = () => {
     setShowRejection,
     detectionCount,
     rejectionCount,
-    handleFrame
+    handleFrame,
+    useHuggingFace
   } = useObjectDetection({
     isPaused,
     acceptedCategories,
@@ -85,7 +86,10 @@ const Dashboard: React.FC = () => {
           </h1>
           <Trash2 size={28} className="text-accent" />
         </div>
-        <p className="text-muted-foreground mt-2">Smart recycling detection and sorting assistant</p>
+        <p className="text-muted-foreground mt-2">
+          Smart recycling detection and sorting assistant
+          {useHuggingFace && <span className="ml-1 text-primary">(using AI)</span>}
+        </p>
       </header>
 
       <CameraPermissionDialog
@@ -108,7 +112,7 @@ const Dashboard: React.FC = () => {
                 <StatisticsSection 
                   detectionCount={detectionCount}
                   rejectionCount={rejectionCount}
-                  isModelLoaded={isModelLoaded}
+                  isModelLoaded={useHuggingFace || isModelLoaded}
                   activeCategory={activeDetection}
                 />
               </div>

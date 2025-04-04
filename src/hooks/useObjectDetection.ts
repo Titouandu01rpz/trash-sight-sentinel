@@ -1,10 +1,9 @@
 
-import { useState, useEffect } from 'react';
-import { Detection } from '@/services/DetectionService';
+import { useDetectionResults } from './useDetectionResults';
+import { useRejectionStatus } from './useRejectionStatus';
+import { useDetectionModel } from './useDetectionModel';
 import detectionService from '@/services/DetectionService';
 import huggingFaceService from '@/services/HuggingFaceService';
-import audioService from '@/services/AudioService';
-import { useToast } from '@/hooks/use-toast';
 
 interface UseObjectDetectionProps {
   isPaused: boolean;
@@ -16,67 +15,28 @@ export const useObjectDetection = ({
   isPaused, 
   acceptedCategories
 }: UseObjectDetectionProps) => {
-  const [detections, setDetections] = useState<Detection[]>([]);
-  const [activeDetection, setActiveDetection] = useState<string | null>(null);
-  const [frameSize, setFrameSize] = useState({ width: 640, height: 480 });
-  const [showRejection, setShowRejection] = useState(false);
-  const [detectionCount, setDetectionCount] = useState(0);
-  const [rejectionCount, setRejectionCount] = useState(0);
-  const [useHuggingFace, setUseHuggingFace] = useState(false);
-  const { toast } = useToast();
-  
-  // Initialize HuggingFace model on component mount
-  useEffect(() => {
-    const initHuggingFace = async () => {
-      try {
-        const success = await huggingFaceService.initModel();
-        if (success) {
-          setUseHuggingFace(true);
-          toast({
-            title: "AI Model Loaded",
-            description: "Using Hugging Face model for waste classification"
-          });
-        }
-      } catch (error) {
-        console.error("Error initializing Hugging Face model:", error);
-      }
-    };
-    
-    initHuggingFace();
-  }, [toast]);
+  const detectionResults = useDetectionResults();
+  const rejectionStatus = useRejectionStatus();
+  const detectionModel = useDetectionModel();
   
   const handleFrame = async (imageData: ImageData) => {
     if (isPaused) return;
     
     // Update frame size
-    if (imageData.width !== frameSize.width || imageData.height !== frameSize.height) {
-      setFrameSize({ width: imageData.width, height: imageData.height });
-    }
+    detectionResults.updateFrameSize(imageData.width, imageData.height);
     
     // Process frame with the appropriate detection service
     try {
       // Use Hugging Face if available, otherwise fall back to mock detection
-      const newDetections = useHuggingFace 
+      const newDetections = detectionModel.useHuggingFace 
         ? await huggingFaceService.detectObjects(imageData)
         : await detectionService.detectObjects(imageData);
       
       if (newDetections.length > 0) {
-        // Track active detection
-        if (newDetections.length > 0) {
-          const largest = newDetections.reduce((prev, current) => {
-            const prevArea = prev.bbox.width * prev.bbox.height;
-            const currentArea = current.bbox.width * current.bbox.height;
-            return currentArea > prevArea ? current : prev;
-          });
-          setActiveDetection(largest.class);
-        } else {
-          setActiveDetection(null);
-        }
-        
-        setDetectionCount(prev => prev + 1);
+        detectionResults.updateDetections(newDetections);
+        detectionResults.incrementDetectionCount();
         
         // Check for rejection conditions - only closest object should trigger rejection
-        let closestRejectionDetected = false;
         
         // Sort detections by size (largest first - assuming closer to camera)
         const sortedDetections = [...newDetections].sort((a, b) => {
@@ -96,40 +56,25 @@ export const useObjectDetection = ({
           );
           
           if (!isAccepted && isClose) {
-            closestRejectionDetected = true;
-            setRejectionCount(prev => prev + 1);
-            setShowRejection(true);
-            audioService.playBeep();
+            detectionResults.incrementRejectionCount();
+            rejectionStatus.triggerRejection();
           }
         }
       }
-      
-      setDetections(newDetections);
     } catch (error) {
       console.error('Error processing frame:', error);
     }
   };
 
-  // Reset rejection status after timeout
-  useEffect(() => {
-    if (showRejection) {
-      const timer = setTimeout(() => {
-        setShowRejection(false);
-      }, 3000); // 3 seconds rejection timeout
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showRejection]);
-
   return {
-    detections,
-    activeDetection,
-    frameSize,
-    showRejection,
-    setShowRejection,
-    detectionCount,
-    rejectionCount,
+    detections: detectionResults.detections,
+    activeDetection: detectionResults.activeDetection,
+    frameSize: detectionResults.frameSize,
+    showRejection: rejectionStatus.showRejection,
+    setShowRejection: rejectionStatus.setShowRejection,
+    detectionCount: detectionResults.detectionCount,
+    rejectionCount: detectionResults.rejectionCount,
     handleFrame,
-    useHuggingFace
+    useHuggingFace: detectionModel.useHuggingFace
   };
 };

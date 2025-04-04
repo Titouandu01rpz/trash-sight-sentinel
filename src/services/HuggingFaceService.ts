@@ -1,5 +1,5 @@
 
-import { pipeline, type Pipeline, ImageClassificationPipeline } from '@huggingface/transformers';
+import { pipeline, type ImageClassificationPipeline } from '@huggingface/transformers';
 import { WasteCategory } from '@/hooks/useTrashCategories';
 import { Detection, BoundingBox } from './DetectionService';
 
@@ -15,8 +15,15 @@ const LABEL_TO_CATEGORY_MAP: Record<string, WasteCategory> = {
   'Trash': 'trash',
   'Shoes': 'shoes',
   'Clothes': 'clothes',
+  'Cups': 'cups'
   // Add mappings for other categories as needed
 };
+
+// Define the structure of the classifier output for better type safety
+interface ClassificationResult {
+  label: string;
+  score: number;
+}
 
 class HuggingFaceService {
   private classificationPipeline: ImageClassificationPipeline | null = null;
@@ -41,7 +48,7 @@ class HuggingFaceService {
       // Create the classification pipeline
       this.modelLoadPromise = pipeline(
         'image-classification',
-        'prithivMLmods/Augmented-Waste-Classifier-SigLIP2'
+        'Xenova/waste-classification-13'  // Using a compatible model instead
       ) as Promise<ImageClassificationPipeline>;
       
       this.classificationPipeline = await this.modelLoadPromise;
@@ -78,12 +85,12 @@ class HuggingFaceService {
       // Run prediction
       const results = await this.classificationPipeline!(imageUrl);
       
-      if (!results.length) return [];
+      if (!Array.isArray(results) || results.length === 0) return [];
 
       // Convert results to our Detection format
       const detections: Detection[] = results
-        .filter(result => result.score > 0.4) // Filter by confidence threshold
-        .map((result) => {
+        .filter((result: ClassificationResult) => result.score > 0.4) // Filter by confidence threshold
+        .map((result: ClassificationResult) => {
           const label = result.label;
           const wasteCategory = LABEL_TO_CATEGORY_MAP[label] || 'trash';
           
